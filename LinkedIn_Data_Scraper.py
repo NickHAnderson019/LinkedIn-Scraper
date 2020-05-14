@@ -153,7 +153,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 # -----------------------------------------------------------------------------
 
 # import constants from config.txt
-with open("config.txt", "r") as read_file:
+with open("../config.txt", "r") as read_file:
     config = json.load(read_file)
 
 # Starts a timer to show how long the program takes to run
@@ -161,6 +161,9 @@ start_time = time.time()
 
 print("---------------------------------------------------------------------")
 print("LinkedIn Data Extractor for PiP")
+print("---------------------------------------------------------------------")
+
+print("NOTE: When the Chrome browser pops up, do not minimize it.")
 print("---------------------------------------------------------------------")
 
 # Ask user to input LinkedIn username and password
@@ -242,7 +245,8 @@ wb = xw.Book(config["CONSTANTS"]["EXCEL_RESULTS_PATH"])
 # if a sheet with today's date already exists
 for sheet in wb.sheets:
     if sheet.name == today:
-        sheet.delete()
+        # sheet.delete()
+        today = today + " " + time.strftime("%H-%M")
 
 wb.sheets.add(name=today)
 sht = wb.sheets[today]
@@ -259,4 +263,4 @@ wb.close()
 print("Finished writing results to Excel")
 print("--- %s minutes ---" % round(((time.time() - start_time)/60),2))
 
-input("Press any key to close the application")
+time.sleep(3)
