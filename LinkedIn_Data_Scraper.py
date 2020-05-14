@@ -163,9 +163,7 @@ print("---------------------------------------------------------------------")
 print("LinkedIn Data Extractor for PiP")
 print("---------------------------------------------------------------------")
 
-# Maybe ask user to input LinkedIn username and password
-# username = 'christine.court.77@gmail.com'
-# password = 'Wildpigs7!'
+# Ask user to input LinkedIn username and password
 USER_EMAIL = input("Enter your LinkedIn Email: ")
 USER_PASSWORD = input("Enter your LinkedIn password: ")
 
@@ -226,8 +224,6 @@ print("Browser Closed")
 print("---------------------------------------------------------------------")
 print("Finished data extraction")
 
-# context.bot.send_message(chat_id=update.effective_chat.id, text="Finished data extraction")
-
 print("Results")
 print("---------------------------------------------------------------------")
 df = pdDataFrame(results, columns=['Name', 'Action', 'Time'])
@@ -262,3 +258,5 @@ wb.close()
 
 print("Finished writing results to Excel")
 print("--- %s minutes ---" % round(((time.time() - start_time)/60),2))
+
+input("Press any key to close the application")
