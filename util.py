@@ -105,3 +105,11 @@ def isPageReady(browser):
         return True
     else:
         return False
+
+
+#
+#
+#
+# button = document.getElementsByClassName('sort-dropdown__dropdown-trigger display-flex t-12 t-black--light t-normal artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view')[0]
+# recent = document.getElementsByClassName("flex-grow-1 justify-flex-start ph4 artdeco-button artdeco-button--muted artdeco-button--1 artdeco-button--tertiary ember-view")[0]
+#

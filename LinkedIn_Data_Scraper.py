@@ -28,7 +28,10 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 
     try:
         # Load the page on the browser
-        linkedin_activity_path = 'https://www.linkedin.com/in/'+emp_id+'/detail/recent-activity/'
+        if emp_id == "partnersinperformance":
+            linkedin_activity_path = 'https://www.linkedin.com/company/'+emp_id+'/'
+        else:
+            linkedin_activity_path = 'https://www.linkedin.com/in/'+emp_id+'/detail/recent-activity/'
         browser.get(linkedin_activity_path)
 
         while(not util.isPageReady(browser)):
@@ -65,6 +68,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         count += 1 # just a counter
 
         postCASE = False # initialise
+        directorCase = False
 
         # split post text by newline character
         post = post.split("\n")
@@ -91,9 +95,16 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                     if j==i-1:
                         postCASE = "CASE 1"
 
+            #Checking for Director posts
+            for i in post:
+                directorCase = "Director at Partners in Performance" in i
+                if directorCase:
+                    postCASE = "CASE 1"
+                    break
+
         # CASE 2 - liked, comment, celebrate PiP post
-        elif ("Partners in Performance" in post[1]):
-            postCASE = "CASE 2"
+        # elif ("Partners in Performance" in post[1]):
+        #     postCASE = "CASE 2"
 
         # CASE 3 - liked, comment, celebrate shared PiP post
         else:
@@ -106,24 +117,27 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                 for j in indices_pip:
                     if j==i-1:
                         postCASE = "CASE 3"
+            #Checking for Director posts
+            for i in post:
+                directorCase = "Director at Partners in Performance" in i
+                if directorCase:
+                    postCASE = "CASE 1"
+                    break
 
         if (not postCASE):
             continue
 
         if (postCASE=="CASE 1"):
             action = "Shared"
-            postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-            postdate = post[postdate_indices[0]]
 
-        if (postCASE=="CASE 2"):
-            action = post[0]
-            postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-            postdate = post[postdate_indices[0]]
+        # if (postCASE=="CASE 2"):
+        #     action = post[0]
 
         if (postCASE=="CASE 3"):
             action = post[0]
-            postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-            postdate = post[postdate_indices[0]]
+
+        postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
+        postdate = post[postdate_indices[0]]
 
         # change format of action (makes all reactions 'Like')
         if "likes" in action or "celebrates" in action or "curious" in action or "loves" in action or "insightful" in action:
@@ -153,7 +167,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 # -----------------------------------------------------------------------------
 
 # import constants from config.txt
-with open("../config.txt", "r") as read_file:
+with open("./config.txt", "r") as read_file:
     config = json.load(read_file)
 
 # Starts a timer to show how long the program takes to run
@@ -167,8 +181,9 @@ print("NOTE: When the Chrome browser pops up, do not minimize it.")
 print("---------------------------------------------------------------------")
 
 # Ask user to input LinkedIn username and password
-USER_EMAIL = input("Enter your LinkedIn Email: ")
-USER_PASSWORD = input("Enter your LinkedIn password: ")
+USER_EMAIL =  "christine.court.77@gmail.com"#input("Enter your LinkedIn Email: ")
+USER_PASSWORD = "Wildpigs7!" #input("Enter your LinkedIn password: ")
+
 
 # PiP employee LinkedIn Details ------------------------------------------------
 
