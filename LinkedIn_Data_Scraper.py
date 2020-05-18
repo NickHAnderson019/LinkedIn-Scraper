@@ -6,6 +6,9 @@
 # LinkedIn account.
 # -----------------------------------------------------------------------------
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time, csv
 import json
 from pandas import DataFrame as pdDataFrame
@@ -34,19 +37,19 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
             linkedin_activity_path = 'https://www.linkedin.com/in/'+emp_id+'/detail/recent-activity/'
         browser.get(linkedin_activity_path)
 
-        while(not util.isPageReady(browser)):
-            # Wait 1 second
-            time.sleep(config["CONSTANTS"]["PAGE_LOAD_TIME"])
+        wait = WebDriverWait(browser, 1)
+        element = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'occludable-update')))
 
         # Data Collection ------------------------------------------------------
 
-
         # Scroll the page down if dates are less than a week
         # or if counter is over 10
-        util.handlePageScrolling(browser, 2)
+        util.handlePageScrolling(browser)
 
         # Get post data for employee
-        textList = util.getPageData(browser)
+        pageData = util.getPageData(browser)
+        textList = pageData[0]
+        mentionList = pageData[1]
 
     except Exception as e:
         print("An error occured. Name: ", emp_name)
@@ -55,10 +58,11 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         textList = []
 
     # String Parsing -----------------------------------------------------------
+    # last_shared_date = util.getLastSharedDate(textList)
 
     emp_results = []
     count = 0
-    for post in textList:
+    for index, post in enumerate(textList):
 
         count += 1 # just a counter
 
@@ -74,9 +78,12 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         else:
             ind_off = 0
 
+        if ("liked" in post[ind_off] or "replied" in post[ind_off]):
+            continue
+
         # CASE 1 - shared
         # Check for likes, comments, celebrates
-        if (not "likes" in post[ind_off] and not "commented" in post[ind_off] and
+        elif (not "likes" in post[ind_off] and not "commented" in post[ind_off] and
             not "celebrates" in post[ind_off] and not "insightful" in post[ind_off] and
             not "loves" in post[ind_off] and not "curious" in post[ind_off]):
             # check for PIP
@@ -97,6 +104,10 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                     postCASE = "CASE 1"
                     break
 
+            #for mentions PIP
+            if mentionList[index] == 1:
+                postCASE= "CASE 1"
+
         else:
             # get index of "followers".
             indices_followers = [i for i, s in enumerate(post) if 'followers' in s]
@@ -107,12 +118,17 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                 for j in indices_pip:
                     if j==i-1:
                         postCASE = "CASE 2"
+
             #Checking for Director posts
             for i in post:
                 directorCase = "Director at Partners in Performance" in i
                 if directorCase:
                     postCASE = "CASE 2"
                     break
+
+            #for mentions PIP
+            if mentionList[index] == 1:
+                postCASE= "CASE 1"
 
         if (not postCASE):
             continue
@@ -123,7 +139,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         if (postCASE=="CASE 2"):
             action = post[0]
 
-        postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
+        postdate_indices = [i for i, s in enumerate(post) if 'minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
         postdate = post[postdate_indices[0]]
 
         # change format of action (makes all reactions 'Like')
