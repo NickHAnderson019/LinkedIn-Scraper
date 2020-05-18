@@ -41,14 +41,9 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         # Data Collection ------------------------------------------------------
 
 
-        # Scroll the page down if dates aren't equal to or over a month
-        # or if counter is over 15
-        counter = 1
-        while (util.pageShouldBeScrolled(browser) and counter<=10):
-            util.scrollPage(browser)
-            counter += 1
-            # Wait 3 seconds for scrolling to do its thing
-            time.sleep(config["CONSTANTS"]["SCROLL_PAUSE_TIME"])
+        # Scroll the page down if dates are less than a week
+        # or if counter is over 10
+        util.handlePageScrolling(browser, 2)
 
         # Get post data for employee
         textList = util.getPageData(browser)
@@ -102,11 +97,6 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                     postCASE = "CASE 1"
                     break
 
-        # CASE 2 - liked, comment, celebrate PiP post
-        # elif ("Partners in Performance" in post[1]):
-        #     postCASE = "CASE 2"
-
-        # CASE 3 - liked, comment, celebrate shared PiP post
         else:
             # get index of "followers".
             indices_followers = [i for i, s in enumerate(post) if 'followers' in s]
@@ -116,12 +106,12 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
             for i in indices_followers:
                 for j in indices_pip:
                     if j==i-1:
-                        postCASE = "CASE 3"
+                        postCASE = "CASE 2"
             #Checking for Director posts
             for i in post:
                 directorCase = "Director at Partners in Performance" in i
                 if directorCase:
-                    postCASE = "CASE 1"
+                    postCASE = "CASE 2"
                     break
 
         if (not postCASE):
@@ -130,10 +120,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         if (postCASE=="CASE 1"):
             action = "Shared"
 
-        # if (postCASE=="CASE 2"):
-        #     action = post[0]
-
-        if (postCASE=="CASE 3"):
+        if (postCASE=="CASE 2"):
             action = post[0]
 
         postdate_indices = [i for i, s in enumerate(post) if 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]

@@ -1,3 +1,4 @@
+import time
 
 def linkedin_login(browser, username, password):
     browser.get('https://www.linkedin.com/uas/login')
@@ -13,55 +14,50 @@ def linkedin_login(browser, username, password):
         pass
 
 
-def pageShouldBeScrolled(browser):
-    scrollAction = browser.execute_script("""
+def handlePageScrolling(browser, sleep_time):
 
-    return (function (){
+    scrollAction = True
+    posts_skip_index = 0
+    count = 0
 
-      scrollAction = true
+    while (scrollAction == True and count <= 10):
+        posts = browser.find_elements_by_class_name("occludable-update")
 
-      var posts = document.getElementsByClassName('occludable-update')
+        if len(posts) == 0:
+            scrollAction = False
+            break
 
-      if (posts.length == 0){
-          scrollAction = false
-          return scrollAction;
-      }
+        for index, post in enumerate(posts):
 
-      for (i in posts) {
-          if (i == "length" || i == "item" || i == "namedItem"){
-              continue;
-          }
-          var post = posts[i];
+            # skip posts that we've already looked at
+            if index < posts_skip_index:
+                continue
 
-          if (post.children[0].children[2].tagName === "ARTICLE") {
-              continue;
-          }
+            # Looking for case of article with no date
+            if len(post.find_elements_by_class_name("feed-shared-update-v2__content feed-shared-article ember-view"))>0:
+                continue
 
-          for (i in post.getElementsByClassName('visually-hidden')){
-              if (i == "length" || i == "item" || i == "namedItem"){
-                  continue;
-              }
-              if (post.getElementsByClassName('visually-hidden')[i].innerText.indexOf("ago")!== -1) {
-                  timeStr = post.getElementsByClassName('visually-hidden')[i].innerText;
-                  break;
-              }
-          }
+            # getting date from post
+            for element in post.find_elements_by_class_name('visually-hidden'):
+                # getting the date element
+                if "ago" in element.text:
+                    timeStr = element.text;
+                    break
 
-          timeStr = timeStr.split(" ")
+            timeStr = timeStr.split(" ")
 
-          if ((timeStr[0] >= 2 && timeStr[1] == 'weeks') || (timeStr[1] == 'month' || timeStr[1] == 'months' || timeStr[1] == 'year' || timeStr[1] == 'years')) {
-              scrollAction = false;
-          }
-        }
+            if 'minute' in timeStr[1] or "hour" in timeStr[1] or "day" in timeStr[1]:
+                scrollAction = True;
+                break
+            else:
+                scrollAction = False
 
-        return scrollAction
-    })
-    ()
-    """)
-    return scrollAction
+        posts_skip_index = len(posts)
+        count += 1
 
-def scrollPage(browser):
-    browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+        if (scrollAction):
+            browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+            time.sleep(sleep_time)
 
 def getPageData(browser):
     # Execute Javascript code on webpage
