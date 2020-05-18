@@ -94,11 +94,13 @@ def getPageData(browser):
 
 
 def getLastSharedDate(textList):
-    last_shared_date = 0
+    latest_shared_date_arr = []
+    has_shared = False
+
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
 
-    for index, post in enumerate(textList):
+    for post in textList[::-1]:
         # split post text by newline character
         post = post.split("\n")
 
@@ -113,17 +115,27 @@ def getLastSharedDate(textList):
             not "loves" in post[ind_off] and not "curious" in post[ind_off] and
             not "liked" in post[ind_off] and not "replied" in post[ind_off]):
 
+            has_shared = True
+
             postdate_indices = [i for i, s in enumerate(post) if 'minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-            postdate = post[postdate_indices[0]]
+            postdate = post[postdate_indices[0]].strip()
             postdate_value = postdate.split(" ")[0]
             postdate_period = postdate.split(" ")[1]
 
             eval_postdate = int(postdate_value)*period_dict[postdate_period]
 
-            if eval_postdate> last_shared_date and eval_postdate<7:
-                last_shared_date = eval_postdate
+            latest_shared_date_arr.append(eval_postdate)
 
-        return last_shared_date_arr
+        else:
+            if has_shared:
+                latest_shared_date_arr.append(latest_shared_date_arr[-1])
+            else:
+                latest_shared_date_arr.append(365)
+
+    return latest_shared_date_arr[::-1]
+
+def converToString(date_in_days):
+    pass
 
 #
 #

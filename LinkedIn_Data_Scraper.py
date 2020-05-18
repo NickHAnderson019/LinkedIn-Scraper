@@ -58,7 +58,13 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         textList = []
 
     # String Parsing -----------------------------------------------------------
-    # last_shared_date = util.getLastSharedDate(textList)
+
+    latest_shared_date_arr = util.getLastSharedDate(textList)
+
+    print(latest_shared_date_arr)
+
+    period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
+                   "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
 
     emp_results = []
     count = 0
@@ -139,19 +145,28 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         if (postCASE=="CASE 2"):
             action = post[0]
 
-        postdate_indices = [i for i, s in enumerate(post) if 'minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-        postdate = post[postdate_indices[0]]
-
         # change format of action (makes all reactions 'Like')
         if "likes" in action or "celebrates" in action or "curious" in action or "loves" in action or "insightful" in action:
             action = "Like"
         elif "commented" in action:
             action = "Comment"
 
+        postdate_indices = [i for i, s in enumerate(post) if 'minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
+        postdate = post[postdate_indices[0]].strip()
+        postdate_value = postdate.split(" ")[0]
+        postdate_period = postdate.split(" ")[1]
+        eval_postdate = int(postdate_value)*period_dict[postdate_period]
+
+        last_shared_date = latest_shared_date_arr[index]
+
         # filter time to less than 1 week
         if (postCASE):
-            if not ("week" in postdate or "weeks" in postdate or "month" in postdate or "months" in postdate or "year" in postdate):
-                emp_results.append([emp_name, action, postdate])
+            if postCASE == "CASE 2":
+                if eval_postdate > last_shared_date:
+                    eval_postdate = last_shared_date
+
+            if eval_postdate < 7:
+                emp_results.append([emp_name, action, str(round(eval_postdate,1)) + " days"])
 
     if (error):
         emp_results.append([emp_name, "error", "error"])
