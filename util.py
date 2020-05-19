@@ -38,7 +38,7 @@ def handlePageScrolling(browser):
                 continue
 
             # Looking for case of article with no date
-            if len(post.find_elements_by_class_name("feed-shared-update-v2__content feed-shared-article ember-view"))>0:
+            if len(post.find_elements_by_class_name("feed-shared-actor"))==0:
                 continue
 
             # getting date from post
@@ -49,7 +49,6 @@ def handlePageScrolling(browser):
                     break
 
             timeStr = timeStr.split(" ")
-
             if 'minute' in timeStr[1] or "hour" in timeStr[1] or "day" in timeStr[1]:
                 scrollAction = True;
                 break
@@ -134,8 +133,6 @@ def getLastSharedDate(textList):
 
     return latest_shared_date_arr[::-1]
 
-def converToString(date_in_days):
-    pass
 
 #
 #

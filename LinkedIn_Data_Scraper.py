@@ -37,8 +37,9 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
             linkedin_activity_path = 'https://www.linkedin.com/in/'+emp_id+'/detail/recent-activity/'
         browser.get(linkedin_activity_path)
 
-        wait = WebDriverWait(browser, 1)
-        element = wait.until(EC.visibility_of_all_elements_located((By.CLASS_NAME, 'occludable-update')))
+        # wait up to 10 seconds for page to be loaded
+        wait = WebDriverWait(browser, 10)
+        wait.until(lambda browser: browser.execute_script('return document.readyState')=='complete')
 
         # Data Collection ------------------------------------------------------
 
@@ -60,8 +61,6 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
     # String Parsing -----------------------------------------------------------
 
     latest_shared_date_arr = util.getLastSharedDate(textList)
-
-    print(latest_shared_date_arr)
 
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
@@ -134,7 +133,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 
             #for mentions PIP
             if mentionList[index] == 1:
-                postCASE= "CASE 1"
+                postCASE= "CASE 2"
 
         if (not postCASE):
             continue
