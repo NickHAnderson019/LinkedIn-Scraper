@@ -44,13 +44,11 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         # Data Collection ------------------------------------------------------
 
         # Scroll the page down if dates are less than a week
-        # or if counter is over 10
+        # or if counter is not over 10
         util.handlePageScrolling(browser)
 
         # Get post data for employee
-        pageData = util.getPageData(browser)
-        textList = pageData[0]
-        mentionList = pageData[1]
+        textList, mentionList = util.getPageData(browser)
 
     except Exception as e:
         print("An error occured. Name: ", emp_name)
@@ -66,10 +64,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
 
     emp_results = []
-    count = 0
     for index, post in enumerate(textList):
-
-        count += 1 # just a counter
 
         postCASE = False # initialise
         directorCase = False
@@ -105,6 +100,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
             #Checking for Director posts
             for i in post:
                 directorCase = "Director at Partners in Performance" in i
+
                 if directorCase:
                     postCASE = "CASE 1"
                     break
@@ -125,8 +121,21 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
                         postCASE = "CASE 2"
 
             #Checking for Director posts
-            for i in post:
+            like_index = 0
+            comment_index = 0
+
+            for count, i in enumerate(post):
                 directorCase = "Director at Partners in Performance" in i
+                if i == "Like":
+                    like_index = count
+                elif i == "Comment" and count == like_index+1:
+                    comment_index =count
+                elif i == "Share" and count == comment_index+1:
+                    break
+                else:
+                    like_index = 0
+                    comment_index = 0
+
                 if directorCase:
                     postCASE = "CASE 2"
                     break
