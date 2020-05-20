@@ -14,7 +14,6 @@ dependencies:
   - numpy=1.18.1=py38h93ca92e_0
   - numpy-base=1.18.1=py38hc3f5095_1
   - openssl=1.1.1g=he774522_0
-  - pandas=1.0.3=py38h47e9c7a_0
   - pip=20.0.2=py38_3
   - python=3.8.2=he1778fa_13
   - python-dateutil=2.8.1=py_0
@@ -37,4 +36,5 @@ dependencies:
     - selenium==3.141.0
     - urllib3==1.25.9
     - xlwings==0.19.1
-prefix: C:\Users\Nick\anaconda3\envs\LInEnv
+prefix: C:\Users\User\miniconda3\envs\LInEnv
+

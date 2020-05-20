@@ -11,7 +11,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time, csv
 import json
-from pandas import DataFrame as pdDataFrame
 import xlwings as xw
 import util
 
@@ -268,10 +267,6 @@ print("Browser Closed")
 print("---------------------------------------------------------------------")
 print("Finished data extraction")
 
-print("Results")
-print("---------------------------------------------------------------------")
-df = pdDataFrame(results, columns=['Name', 'Action', 'Time'])
-print(df)
 print("---------------------------------------------------------------------")
 
 # Write data to Excel --------------------------------------------------------
@@ -294,7 +289,8 @@ sht = wb.sheets[today]
 
 sht.clear()
 
-sht.range("A1").value = df
+sht.range("A1").value = ['Name', 'Action', 'Time']
+sht.range("A2").value = results
 
 sht.autofit()
 
