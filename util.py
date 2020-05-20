@@ -70,6 +70,10 @@ def getPageData(browser):
 
     try:
         for post in posts:
+            # Looking for case of article with no date
+            if len(post.find_elements_by_class_name("feed-shared-actor"))==0:
+                continue
+
             textList.append(post.text)
 
             linkList = post.find_elements_by_tag_name("a")
@@ -92,46 +96,33 @@ def getPageData(browser):
         return "ERROR"
 
 
-def getLastSharedDate(textList):
-    latest_shared_date_arr = []
-    has_shared = False
+def getLastDate(textList):
+    latest_date_arr = []
 
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
 
-    for post in textList[::-1]:
+    for index,post in enumerate(textList[::-1]):
         # split post text by newline character
         post = post.split("\n")
 
-        # if user is online, this is the first element of post
-        if ('Status is online' in post[0]):
-            ind_off = 1
-        else:
-            ind_off = 0
+        postdate_indices = [i for i, s in enumerate(post) if ('minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s) and ('ago' in s)]
 
-        if (not "likes" in post[ind_off] and not "commented" in post[ind_off] and
-            not "celebrates" in post[ind_off] and not "insightful" in post[ind_off] and
-            not "loves" in post[ind_off] and not "curious" in post[ind_off] and
-            not "liked" in post[ind_off] and not "replied" in post[ind_off]):
+        postdate = post[postdate_indices[0]].strip()
 
-            has_shared = True
+        postdate_value = postdate.split(" ")[0]
+        postdate_period = postdate.split(" ")[1]
+        eval_postdate = int(postdate_value)*period_dict[postdate_period]
 
-            postdate_indices = [i for i, s in enumerate(post) if 'minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s]
-            postdate = post[postdate_indices[0]].strip()
-            postdate_value = postdate.split(" ")[0]
-            postdate_period = postdate.split(" ")[1]
-
-            eval_postdate = int(postdate_value)*period_dict[postdate_period]
-
-            latest_shared_date_arr.append(eval_postdate)
-
-        else:
-            if has_shared:
-                latest_shared_date_arr.append(latest_shared_date_arr[-1])
+        if not index == 0:
+            if eval_postdate < latest_date_arr[-1]:
+                latest_date_arr.append(eval_postdate)
             else:
-                latest_shared_date_arr.append(365)
+                latest_date_arr.append(latest_date_arr[-1])
+        else:
+            latest_date_arr.append(eval_postdate)
 
-    return latest_shared_date_arr[::-1]
+    return latest_date_arr[::-1]
 
 
 #

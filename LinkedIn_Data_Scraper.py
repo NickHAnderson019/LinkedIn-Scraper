@@ -57,7 +57,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 
     # String Parsing -----------------------------------------------------------
 
-    latest_shared_date_arr = util.getLastSharedDate(textList)
+    latest_date_arr = util.getLastDate(textList)
 
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
@@ -162,15 +162,16 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         postdate = post[postdate_indices[0]].strip()
         postdate_value = postdate.split(" ")[0]
         postdate_period = postdate.split(" ")[1]
+        
         eval_postdate = int(postdate_value)*period_dict[postdate_period]
 
-        last_shared_date = latest_shared_date_arr[index]
+        last_date = latest_date_arr[index]
 
         # filter time to less than 1 week
         if (postCASE):
-            if postCASE == "CASE 2":
-                if eval_postdate > last_shared_date:
-                    eval_postdate = last_shared_date
+            if postCASE:
+                if eval_postdate > last_date:
+                    eval_postdate = last_date
 
             if eval_postdate < 7:
                 emp_results.append([emp_name, action, str(round(eval_postdate,1)) + " days"])
