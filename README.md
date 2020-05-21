@@ -63,3 +63,9 @@ To create an executable, run the following command:
 ```
 pyinstaller LinkedIn_Data_Scraper.py
 ```
+
+## chromedriver
+
+You may need to install a different version of chromedriver, depending on what version of Google Chrome you have:
+
+https://chromedriver.chromium.org/downloads

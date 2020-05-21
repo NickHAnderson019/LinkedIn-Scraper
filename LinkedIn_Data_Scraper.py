@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time, csv
 import json
 import xlwings as xw
+import sys
 import util
 
 # -----------------------------------------------------------------------------
@@ -49,6 +50,8 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         # Get post data for employee
         textList, mentionList = util.getPageData(browser)
 
+        latest_date_arr = util.getLastDate(textList)
+
     except Exception as e:
         print("An error occured. Name: ", emp_name)
         print(e)
@@ -56,8 +59,6 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         textList = []
 
     # String Parsing -----------------------------------------------------------
-
-    latest_date_arr = util.getLastDate(textList)
 
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
@@ -193,7 +194,12 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 # -----------------------------------------------------------------------------
 
 # import constants from config.txt
-with open("../config.txt", "r") as read_file:
+if len(sys.argv) > 1:
+    config_path = "./config.txt"
+else:
+    config_path = "../config.txt"
+
+with open(config_path, "r") as read_file:
     config = json.load(read_file)
 
 # Starts a timer to show how long the program takes to run
