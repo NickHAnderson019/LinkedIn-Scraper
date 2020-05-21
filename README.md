@@ -59,6 +59,11 @@ Also, for some reason, I needed to install the devlopment version of pyinstaller
 pip install https://github.com/pyinstaller/pyinstaller/archive/develop.tar.gz
 ```
 
+To run, run the following command:
+```
+python LinkedIn_Data_Scraper.py test
+```
+
 To create an executable, run the following command:
 ```
 pyinstaller LinkedIn_Data_Scraper.py
