@@ -102,25 +102,30 @@ def getLastDate(textList):
     period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
                    "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
 
-    for index,post in enumerate(textList[::-1]):
-        # split post text by newline character
-        post = post.split("\n")
+    try:
+        for index,post in enumerate(textList[::-1]):
+            # split post text by newline character
+            post = post.split("\n")
 
-        postdate_indices = [i for i, s in enumerate(post) if ('minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s) and ('ago' in s)]
+            postdate_indices = [i for i, s in enumerate(post) if ('minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s) and ('ago' in s)]
 
-        postdate = post[postdate_indices[0]].strip()
+            postdate = post[postdate_indices[0]].strip()
 
-        postdate_value = postdate.split(" ")[0]
-        postdate_period = postdate.split(" ")[1]
-        eval_postdate = int(postdate_value)*period_dict[postdate_period]
+            postdate_value = postdate.split(" ")[0]
+            postdate_period = postdate.split(" ")[1]
+            eval_postdate = int(postdate_value)*period_dict[postdate_period]
 
-        if not index == 0:
-            if eval_postdate < latest_date_arr[-1]:
-                latest_date_arr.append(eval_postdate)
+            if not index == 0:
+                if eval_postdate < latest_date_arr[-1]:
+                    latest_date_arr.append(eval_postdate)
+                else:
+                    latest_date_arr.append(latest_date_arr[-1])
             else:
-                latest_date_arr.append(latest_date_arr[-1])
-        else:
-            latest_date_arr.append(eval_postdate)
+                latest_date_arr.append(eval_postdate)
+
+    except Exception as e:
+        print(e)
+        return "ERROR"
 
     return latest_date_arr[::-1]
 
