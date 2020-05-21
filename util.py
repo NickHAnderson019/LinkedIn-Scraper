@@ -1,3 +1,7 @@
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
 
 def linkedin_login(browser, username, password):
     browser.get('https://www.linkedin.com/uas/login')
@@ -13,95 +17,124 @@ def linkedin_login(browser, username, password):
         pass
 
 
-def pageShouldBeScrolled(browser):
-    scrollAction = browser.execute_script("""
+def handlePageScrolling(browser):
+    # wait = WebDriverWait(browser, 1)
+    # element = wait.until(EC.invisibility_of_element((By.CLASS_NAME, 'detail-page-loader')))
 
-    return (function (){
+    scrollAction = True
+    posts_skip_index = 0
+    count = 0
 
-      scrollAction = true
+    while (scrollAction == True and count <= 10):
+        posts = browser.find_elements_by_class_name("occludable-update")
 
-      var posts = document.getElementsByClassName('occludable-update')
+        if len(posts) == 0:
+            scrollAction = False
+            break
 
-      if (posts.length == 0){
-          scrollAction = false
-          return scrollAction;
-      }
+        for index, post in enumerate(posts):
+            # skip posts that we've already looked at
+            if index < posts_skip_index:
+                continue
 
-      for (i in posts) {
-          if (i == "length" || i == "item" || i == "namedItem"){
-              continue;
-          }
-          var post = posts[i];
+            # Looking for case of article with no date
+            if len(post.find_elements_by_class_name("feed-shared-actor"))==0:
+                continue
 
-          if (post.children[0].children[2].tagName === "ARTICLE") {
-              continue;
-          }
+            # getting date from post
+            for element in post.find_elements_by_class_name('visually-hidden'):
+                # getting the date element
+                if "ago" in element.text:
+                    timeStr = element.text;
+                    break
 
-          for (i in post.getElementsByClassName('visually-hidden')){
-              if (i == "length" || i == "item" || i == "namedItem"){
-                  continue;
-              }
-              if (post.getElementsByClassName('visually-hidden')[i].innerText.indexOf("ago")!== -1) {
-                  timeStr = post.getElementsByClassName('visually-hidden')[i].innerText;
-                  break;
-              }
-          }
+            timeStr = timeStr.split(" ")
+            if 'minute' in timeStr[1] or "hour" in timeStr[1] or "day" in timeStr[1]:
+                scrollAction = True;
+                break
+            else:
+                scrollAction = False
 
-          timeStr = timeStr.split(" ")
+        posts_skip_index = len(posts)
+        count += 1
 
-          if ((timeStr[0] >= 2 && timeStr[1] == 'weeks') || (timeStr[1] == 'month' || timeStr[1] == 'months' || timeStr[1] == 'year' || timeStr[1] == 'years')) {
-              scrollAction = false;
-          }
-        }
+        if (scrollAction):
+            browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
+            time.sleep(0.5)
 
-        return scrollAction
-    })
-    ()
-    """)
-    return scrollAction
-
-def scrollPage(browser):
-    browser.execute_script("window.scrollTo(0,document.body.scrollHeight);")
 
 def getPageData(browser):
-    # Execute Javascript code on webpage
-    textList = browser.execute_script("""
-    return (function(){
-        textList = [];
-        var posts = document.getElementsByClassName('occludable-update')
-        try{
-            if (posts.length != 0){
-                for (i in posts) {
-                    if (i == "length" || i == "item" || i == "namedItem"){
-                        continue;
-                    }
-                    var post = posts[i];
-                    textList.push(post.innerText)
-                }
-                return textList;
-            }
-            else {
-                textList = []
-                return textList;
-            }
-        }
-        catch(e){
-            return 'ERROR';
-        }
-    })
-    ()
-    """)
-    return textList
+    textList =[]
+    mentionList =[]
+    posts = browser.find_elements_by_class_name("occludable-update")
 
-def isPageReady(browser):
-    state = browser.execute_script("""
-    return (function(){
-        return document.readyState
-    })
-    ()
-    """)
+    try:
+        for post in posts:
+            # Looking for case of article with no date
+            if len(post.find_elements_by_class_name("feed-shared-actor"))==0:
+                continue
 
-    if state == "complete":
-        return True
-    else:
-        return False
+            textList.append(post.text)
+
+            linkList = post.find_elements_by_tag_name("a")
+
+            isLink = False
+            for link in linkList:
+                if link.text == "Partners in Performance":
+                    isLink = True
+                    break
+
+            if isLink:
+                mentionList.append(1)
+            else:
+                mentionList.append(0)
+
+        return [textList, mentionList]
+
+    except Exception as e:
+        print(e)
+        return "ERROR"
+
+
+def getLastDate(textList):
+    latest_date_arr = []
+
+    period_dict = {"minute":1/60*1/24, "hour":1/24, "day":1, "week":7, "month":30, "year":365,
+                   "minutes":1/60*1/24, "hours":1/24, "days":1, "weeks":7, "months":30, "years":365}
+
+    try:
+        for index,post in enumerate(textList[::-1]):
+            # split post text by newline character
+            post = post.split("\n")
+
+            postdate_indices = [i for i, s in enumerate(post) if ('minute' in s or 'day' in s or 'hour' in s or 'week' in s or 'month' in s or 'year' in s) and ('ago' in s)]
+
+            postdate = post[postdate_indices[0]].strip()
+
+            postdate_value = postdate.split(" ")[0]
+            postdate_period = postdate.split(" ")[1]
+            eval_postdate = int(postdate_value)*period_dict[postdate_period]
+
+            if not index == 0:
+                if eval_postdate < latest_date_arr[-1]:
+                    latest_date_arr.append(eval_postdate)
+                else:
+                    latest_date_arr.append(latest_date_arr[-1])
+            else:
+                latest_date_arr.append(eval_postdate)
+
+    except Exception as e:
+        print(e)
+        return "ERROR"
+
+    return latest_date_arr[::-1]
+
+
+#
+#
+#
+# button = document.getElementsByClassName('sort-dropdown__dropdown-trigger display-flex t-12 t-black--light t-normal artdeco-dropdown__trigger artdeco-dropdown__trigger--placement-bottom ember-view')[0]
+# recent = document.getElementsByClassName("flex-grow-1 justify-flex-start ph4 artdeco-button artdeco-button--muted artdeco-button--1 artdeco-button--tertiary ember-view")[0]
+
+#link to partners in perfomrance
+# <a href="https://www.linkedin.com/company/43075/" data-attribute-index="0" data-entity-hovercard-id="urn:li:fs_miniCompany:43075" data-entity-type="MINI_COMPANY">Partners in Performance</a>

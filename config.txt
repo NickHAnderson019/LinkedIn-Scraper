@@ -1,8 +1,8 @@
 {"CONSTANTS":
     {
       "CHROME_DRIVER_PATH": "chromedriver.exe",
-      "EMPLOYEE_DETAILS_PATH": "empdetails.csv",
-      "EXCEL_RESULTS_PATH": "results.xlsx",
+      "EMPLOYEE_DETAILS_PATH": "Employee_Details.csv",
+      "EXCEL_RESULTS_PATH": "Results.xlsm",
       "SCROLL_PAUSE_TIME": 3,
       "PAGE_LOAD_TIME": 1
     }
