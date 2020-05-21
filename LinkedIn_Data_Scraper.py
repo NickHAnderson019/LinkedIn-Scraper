@@ -162,7 +162,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
         postdate = post[postdate_indices[0]].strip()
         postdate_value = postdate.split(" ")[0]
         postdate_period = postdate.split(" ")[1]
-        
+
         eval_postdate = int(postdate_value)*period_dict[postdate_period]
 
         last_date = latest_date_arr[index]
@@ -193,7 +193,7 @@ def getEmployeeData(browser, employee, emp_count, emp_total):
 # -----------------------------------------------------------------------------
 
 # import constants from config.txt
-with open("./config.txt", "r") as read_file:
+with open("../config.txt", "r") as read_file:
     config = json.load(read_file)
 
 # Starts a timer to show how long the program takes to run
@@ -207,8 +207,8 @@ print("NOTE: When the Chrome browser pops up, do not minimize it.")
 print("---------------------------------------------------------------------")
 
 # Ask user to input LinkedIn username and password
-USER_EMAIL =  "christine.court.77@gmail.com"#input("Enter your LinkedIn Email: ")
-USER_PASSWORD = "Wildpigs7!" #input("Enter your LinkedIn password: ")
+USER_EMAIL =  input("Enter your LinkedIn Email: ")
+USER_PASSWORD = input("Enter your LinkedIn password: ")
 
 
 # PiP employee LinkedIn Details ------------------------------------------------
